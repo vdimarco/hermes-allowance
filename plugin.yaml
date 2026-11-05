@@ -1,0 +1,38 @@
+name: allowance
+version: "0.1.0"
+manifest_version: 2
+description: "A PayPal wallet with limits for your agent: auto-pays small purchases, sends big ones to you for PayPal approval, and blocks the rest. Prompt-injection-proof spend gate."
+homepage: https://github.com/vdimarco/hermes-allowance
+license: MIT
+requires_hermes: ">=0.22.0"
+tags: [paypal, payments, shopping, agentic-commerce, wallet]
+# Declared surfaces must exactly match what register(ctx) registers.
+provides_tools:
+  - allowance_search_products
+  - allowance_propose_purchase
+  - allowance_buy
+  - allowance_confirm_payment
+  - allowance_cancel
+  - allowance_refund
+  - allowance_wallet_status
+  - allowance_list_purchases
+# The /allowance slash command (ctx.register_command) is the human-only control
+# channel for limits and auto-pay. Manifest v2 has no provides_commands field.
+requires_env:
+  - name: PAYPAL_CLIENT_ID
+    secret: true
+    required: true
+    description: "PayPal REST app client ID (developer.paypal.com > Apps & Credentials, Sandbox)."
+  - name: PAYPAL_CLIENT_SECRET
+    secret: true
+    required: true
+    description: "PayPal REST app secret."
+  - name: CHANNEL3_API_KEY
+    secret: true
+    required: false
+    description: "Channel3 product search key (trychannel3.com). Without it the plugin uses a small demo catalog."
+config_schema:
+  paypal_env: {type: str, default: "sandbox", description: "sandbox or live."}
+  db_path: {type: str, default: "", description: "Ledger SQLite path. Default ~/.hermes/allowance/ledger.db."}
+  return_base_url: {type: str, default: "", description: "Base URL PayPal returns to after approval (e.g. your hosted Allowance web app)."}
+  demo_catalog: {type: bool, default: false, description: "Force the offline demo catalog."}
