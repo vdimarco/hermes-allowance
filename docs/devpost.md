@@ -1,5 +1,9 @@
 # Devpost submission: Allowance
 
+- Video: https://youtu.be/QWialYr-c78
+- Demo: https://hermes-allowance.vercel.app
+- Code: https://github.com/vdimarco/hermes-allowance
+
 ## Tagline
 Give your AI agent a PayPal wallet with limits. It pays for small things by itself, asks you in PayPal for big things, and blocks the rest.
 

@@ -6,6 +6,8 @@ Built for the [PayPal AI Hackathon 2026](https://paypalaihackathon.devpost.com/)
 
 > Sandbox only. No real money moves.
 
+**Demo video:** https://youtu.be/QWialYr-c78 · **Live demo:** https://hermes-allowance.vercel.app
+
 ## The problem
 
 Agents can shop now. But you have two bad choices: give the agent your card and hope, or approve every single purchase yourself. Allowance is the middle path. It works the way an allowance works for a person: a budget, a limit for "just buy it", and a rule that big things need a yes from you.
