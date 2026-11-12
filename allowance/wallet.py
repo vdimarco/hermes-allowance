@@ -400,7 +400,8 @@ def build_from_env(db_path: str | None = None, public_url: str | None = None) ->
     which = env.get("ALLOWANCE_CATALOG") or ("channel3" if env.get("CHANNEL3_API_KEY") else "demo")
     catalog = Channel3Catalog(env.get("CHANNEL3_API_KEY")) if which == "channel3" else DemoCatalog()
     base = LIVE if env.get("PAYPAL_ENV", "sandbox").lower() == "live" else SANDBOX
-    pp = PayPalClient(env.get("PAYPAL_CLIENT_ID"), env.get("PAYPAL_CLIENT_SECRET"), base_url=base)
+    pp = PayPalClient((env.get("PAYPAL_CLIENT_ID") or "").strip() or None,
+                      (env.get("PAYPAL_CLIENT_SECRET") or "").strip() or None, base_url=base)
     vercel_url = env.get("VERCEL_PROJECT_PRODUCTION_URL")
     public = public_url or env.get("ALLOWANCE_PUBLIC_URL") or (f"https://{vercel_url}" if vercel_url else "http://localhost:8000")
     return Wallet(led, catalog, pp, public_url=public)
