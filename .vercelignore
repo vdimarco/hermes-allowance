@@ -1,0 +1,7 @@
+.venv
+tests
+docs
+*.db
+*.db-*
+__pycache__
+Dockerfile

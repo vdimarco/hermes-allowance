@@ -395,9 +395,12 @@ class Wallet:
 
 def build_from_env(db_path: str | None = None, public_url: str | None = None) -> Wallet:
     env = os.environ
-    led = Ledger(db_path or env.get("ALLOWANCE_DB", "data/allowance.db"))
+    default_db = "/tmp/allowance.db" if env.get("VERCEL") else "data/allowance.db"
+    led = Ledger(db_path or env.get("ALLOWANCE_DB", default_db))
     which = env.get("ALLOWANCE_CATALOG") or ("channel3" if env.get("CHANNEL3_API_KEY") else "demo")
     catalog = Channel3Catalog(env.get("CHANNEL3_API_KEY")) if which == "channel3" else DemoCatalog()
     base = LIVE if env.get("PAYPAL_ENV", "sandbox").lower() == "live" else SANDBOX
     pp = PayPalClient(env.get("PAYPAL_CLIENT_ID"), env.get("PAYPAL_CLIENT_SECRET"), base_url=base)
-    return Wallet(led, catalog, pp, public_url=public_url or env.get("ALLOWANCE_PUBLIC_URL", "http://localhost:8000"))
+    vercel_url = env.get("VERCEL_PROJECT_PRODUCTION_URL")
+    public = public_url or env.get("ALLOWANCE_PUBLIC_URL") or (f"https://{vercel_url}" if vercel_url else "http://localhost:8000")
+    return Wallet(led, catalog, pp, public_url=public)

@@ -105,6 +105,10 @@ Open http://localhost:8000. Without `CHANNEL3_API_KEY`, the app uses a small off
 
 ### 3. Deploy
 
+**Live demo:** https://hermes-allowance.vercel.app (Vercel). On Vercel the ledger is in `/tmp`, so it resets when an instance goes cold: each visitor starts with a fresh $50 wallet. Set `PAYPAL_CLIENT_ID`, `PAYPAL_CLIENT_SECRET` and `ANTHROPIC_API_KEY` in the project settings. The public URL comes from `VERCEL_PROJECT_PRODUCTION_URL`.
+
+For a persistent ledger, use the Dockerfile instead.
+
 The `Dockerfile` runs anywhere (Railway, Render, Fly). Set the variables from `.env.example`, set `ALLOWANCE_PUBLIC_URL` to the public URL, and mount a volume at `/data` to keep the ledger.
 
 ### 4. Hermes plugin
