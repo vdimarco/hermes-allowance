@@ -51,6 +51,7 @@ HELP = """/allowance status
 /allowance reset          start a new budget window
 /allowance connect        save your PayPal account for auto-pay (opens PayPal)
 /allowance connected <approval_token_id>   finish auto-pay setup
+/allowance test-card      sandbox only: auto-pay with PayPal's test card
 /allowance disconnect
 /allowance cancel <purchase_id> | refund <purchase_id>"""
 
@@ -86,6 +87,8 @@ def make_command(get_wallet):
                         f"Then run: /allowance connected {res['setup_token_id']}")
             if cmd == "connected" and rest:
                 return json.dumps(w.vault_finish(rest[0]), indent=2)
+            if cmd == "test-card":
+                return json.dumps(w.vault_test_card(), indent=2)
             if cmd == "disconnect":
                 return json.dumps(w.vault_disconnect(), indent=2)
             if cmd == "cancel" and rest:

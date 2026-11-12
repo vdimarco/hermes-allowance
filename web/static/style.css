@@ -99,3 +99,4 @@ button.ghost { background: transparent; color: var(--muted); border: 1px solid v
   .chat { min-height: 60vh; }
   .stats dd { font-size: 17px; }
 }
+.ap-btns { display: flex; gap: 6px; flex-wrap: wrap; }

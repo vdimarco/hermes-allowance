@@ -99,7 +99,7 @@ class PayPalClient:
     # orders -----------------------------------------------------------------
     def create_order(self, *, amount: str, currency: str, description: str, custom_id: str,
                      return_url: str | None = None, cancel_url: str | None = None,
-                     vault_id: str | None = None, request_id: str | None = None,
+                     vault_id: str | None = None, vault_type: str = "paypal", request_id: str | None = None,
                      item_name: str | None = None, quantity: int = 1, unit_amount: str | None = None) -> dict:
         unit = {
             "amount": {
@@ -120,7 +120,7 @@ class PayPalClient:
             }]
         body: dict = {"intent": "CAPTURE", "purchase_units": [unit]}
         if vault_id:
-            body["payment_source"] = {"paypal": {"vault_id": vault_id}}
+            body["payment_source"] = {vault_type: {"vault_id": vault_id}}
         else:
             body["payment_source"] = {"paypal": {"experience_context": {
                 "brand_name": self.brand_name,
@@ -157,6 +157,15 @@ class PayPalClient:
                 "return_url": return_url,
                 "cancel_url": cancel_url,
             },
+        }}}
+        return self._call("POST", "/v3/vault/setup-tokens", body, request_id or str(uuid.uuid4()))
+
+    def create_card_setup_token(self, *, number: str, expiry: str, name: str, request_id: str | None = None) -> dict:
+        """Sandbox only: save a PayPal test card server-side. A live app collects cards with PayPal's card fields."""
+        body = {"payment_source": {"card": {
+            "number": number, "expiry": expiry, "name": name,
+            "billing_address": {"address_line_1": "2211 N First Street", "admin_area_2": "San Jose",
+                                "admin_area_1": "CA", "postal_code": "95131", "country_code": "US"},
         }}}
         return self._call("POST", "/v3/vault/setup-tokens", body, request_id or str(uuid.uuid4()))
 

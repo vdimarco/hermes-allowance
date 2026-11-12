@@ -69,7 +69,7 @@ sequenceDiagram
 |---|---|
 | OAuth 2.0 client credentials | Access token |
 | Orders v2: create, get, capture | Every purchase |
-| Vault v3: setup tokens, payment tokens | Save your PayPal account for auto-pay (buyer not present) |
+| Vault v3: setup tokens, payment tokens | Save a PayPal account or card for auto-pay (buyer not present) |
 | Payments v2: refund capture | Refunds |
 | Webhooks: verify signature | `CHECKOUT.ORDER.APPROVED`, `PAYMENT.CAPTURE.*` |
 
@@ -87,6 +87,8 @@ sequenceDiagram
 1. Go to [developer.paypal.com](https://developer.paypal.com) > Apps & Credentials > Sandbox > Create App.
 2. Copy the client ID and secret.
 3. In the app settings, turn on **Vault** (under Accept payments > Advanced options). Auto-pay needs it.
+   - **Connect PayPal** saves a PayPal account. PayPal allows this only for merchants with reference transactions turned on, which most sandbox accounts do not have.
+   - **Use sandbox test card** saves PayPal's Visa test card with Vault v3 instead. It works in any sandbox app, so use it for the demo.
 4. Use a sandbox **personal** account (Testing Tools > Sandbox Accounts) to approve payments.
 
 ### 2. Local
@@ -130,7 +132,11 @@ pip install pytest
 python -m pytest -q
 ```
 
-38 tests cover the policy, every payment path against a fake PayPal API, the prompt-injection case, double-buy and race guards, webhooks, the Hermes manifest, the agent loop and the web endpoints.
+39 tests cover the policy, every payment path against a fake PayPal API, the prompt-injection case, double-buy and race guards, webhooks, the Hermes manifest, the agent loop and the web endpoints.
+
+## Live sandbox check
+
+Verified against the real PayPal sandbox on Nov 12, 2026: order create, buyer approval, capture and refund; Vault v3 card setup token, payment token, buyer-not-present order (COMPLETED in one call) and refund.
 
 ## Layout
 

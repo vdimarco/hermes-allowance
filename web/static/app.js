@@ -99,7 +99,13 @@ function renderStatus(s) {
     ap.innerHTML = `<span class="on">● Auto-pay on</span><span>${esc(s.auto_pay_account || "PayPal account saved")}</span><button class="ghost" id="disc" type="button">Disconnect</button>`;
     $("#disc").onclick = async () => { await api("/api/vault/disconnect", { method: "POST" }); refresh(); };
   } else {
-    ap.innerHTML = `<span class="off">○ Auto-pay off: every purchase needs your PayPal approval</span><button id="conn" type="button">Connect PayPal</button>`;
+    ap.innerHTML = `<span class="off">○ Auto-pay off: every purchase needs your PayPal approval</span><span class="ap-btns"><button id="conn" type="button">Connect PayPal</button>${s.paypal_env === "live" ? "" : '<button id="card" class="ghost" type="button">Use sandbox test card</button>'}</span>`;
+    const cb = $("#card");
+    if (cb) cb.onclick = async () => {
+      cb.disabled = true;
+      try { await api("/api/vault/test-card", { method: "POST" }); toast("Auto-pay on with the sandbox test card."); refresh(); }
+      catch (e) { toast(e.message); cb.disabled = false; }
+    };
     $("#conn").onclick = async () => {
       try { const r = await api("/api/vault/connect", { method: "POST" }); location.href = r.approve_url; }
       catch (e) { toast(e.message); }

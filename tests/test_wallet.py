@@ -160,3 +160,12 @@ def test_tools_have_no_way_to_change_limits_or_approve():
     assert set(h) == set(TOOL_NAMES)
     assert h["allowance_buy"]({"purchase_id": "nope"})["ok"] is False
     assert h["allowance_search_products"](None)["ok"] is False  # bad args never raise
+
+
+def test_sandbox_test_card_enables_auto_pay():
+    w, fake, _ = make_wallet(vault=False)
+    res = w.vault_test_card()
+    assert res["ok"] and "1111" in res["auto_pay_account"]
+    assert w.vault()["type"] == "card"
+    _, bought = propose_buy(w, "demo-usbc-cable")
+    assert bought["purchase"]["status"] == L.PAID

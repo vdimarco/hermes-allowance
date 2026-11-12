@@ -57,7 +57,7 @@ class FakePayPal:
         if method == "POST" and path == "/v2/checkout/orders":
             oid = f"ORDER{next(self.ids)}"
             pu = body["purchase_units"][0]
-            src = body["payment_source"]["paypal"]
+            src = next(iter(body["payment_source"].values()))
             o = {"id": oid, "amount": pu["amount"], "custom_id": pu["custom_id"], "status": "PAYER_ACTION_REQUIRED"}
             if src.get("vault_id"):
                 o["status"] = "COMPLETED"
@@ -78,10 +78,14 @@ class FakePayPal:
             return httpx.Response(201, json=self._order_view(o))
         if method == "POST" and path.startswith("/v2/payments/captures/") and path.endswith("/refund"):
             return httpx.Response(201, json={"id": f"REF{next(self.ids)}", "status": "COMPLETED"})
-        if method == "POST" and path == "/v3/vault/setup-tokens":
+        if method == "POST" and path == "/v3/vault/setup-tokens" and "card" not in body.get("payment_source", {}):
             tid = f"SETUP{next(self.ids)}"
             return httpx.Response(201, json={"id": tid, "status": "PAYER_ACTION_REQUIRED",
                                              "links": [{"rel": "approve", "href": f"https://www.sandbox.paypal.com/agreements/approve?approval_session_id={tid}"}]})
+        if method == "POST" and path == "/v3/vault/setup-tokens" and "card" in body.get("payment_source", {}):
+            return httpx.Response(201, json={"id": "CARDSETUP", "status": "APPROVED"})
+        if method == "POST" and path == "/v3/vault/payment-tokens" and body["payment_source"]["token"]["id"] == "CARDSETUP":
+            return httpx.Response(201, json={"id": "CARDVAULT", "payment_source": {"card": {"brand": "VISA", "last_digits": "1111"}}})
         if method == "POST" and path == "/v3/vault/payment-tokens":
             return httpx.Response(201, json={"id": "VAULT1", "payment_source": {"paypal": {"email_address": "buyer@example.com"}}})
         if method == "DELETE" and path.startswith("/v3/vault/payment-tokens/"):

@@ -201,7 +201,8 @@ class Wallet:
         )
         try:
             if decision.kind == AUTO:
-                order = self.paypal.create_order(vault_id=self.vault()["id"], **order_args)
+                v = self.vault()
+                order = self.paypal.create_order(vault_id=v["id"], vault_type=v.get("type", "paypal"), **order_args)
                 return self._after_order(p, order, auto=True)
             order = self.paypal.create_order(
                 return_url=f"{self.public_url}/paypal/return",
@@ -336,11 +337,24 @@ class Wallet:
             return _err("this approval does not match the pending auto-pay setup")
         res = self.paypal.create_payment_token(setup_token_id, request_id=f"pt-{setup_token_id}")
         paypal_src = (res.get("payment_source") or {}).get("paypal") or {}
-        self.ledger.set_setting("vault", {"id": res["id"], "email": paypal_src.get("email_address"),
-                                          "created": self.now()})
+        self.ledger.set_setting("vault", {"id": res["id"], "type": "paypal",
+                                          "email": paypal_src.get("email_address"), "created": self.now()})
         self.ledger.delete_setting("pending_setup_token")
         self.ledger.log("vault_connected", None, email=paypal_src.get("email_address"))
         return {"ok": True, "auto_pay_account": paypal_src.get("email_address")}
+
+    def vault_test_card(self) -> dict:
+        """Sandbox only: save PayPal's Visa test card for auto-pay (no human step needed).
+        Saving a PayPal account needs reference transactions, which sandbox merchants often lack."""
+        if self.paypal.base_url == LIVE:
+            return _err("test cards work only in the sandbox")
+        st = self.paypal.create_card_setup_token(number="4111111111111111", expiry="2030-12", name="Sandbox Buyer")
+        res = self.paypal.create_payment_token(st["id"], request_id=f"pt-{st['id']}")
+        card = (res.get("payment_source") or {}).get("card") or {}
+        label = f"Sandbox test card {card.get('brand', 'VISA').title()} •••• {card.get('last_digits', '1111')}"
+        self.ledger.set_setting("vault", {"id": res["id"], "type": "card", "email": label, "created": self.now()})
+        self.ledger.log("vault_connected", None, method="test_card")
+        return {"ok": True, "auto_pay_account": label}
 
     def vault_disconnect(self) -> dict:
         v = self.vault()

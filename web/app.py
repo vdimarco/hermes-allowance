@@ -178,6 +178,14 @@ def vault_connect():
         raise HTTPException(502, f"PayPal error: {exc.name}: {exc.message}")
 
 
+@app.post("/api/vault/test-card")
+def vault_test_card():
+    try:
+        return wallet.vault_test_card()
+    except PayPalError as exc:
+        raise HTTPException(502, f"PayPal error: {exc.name}: {exc.message}")
+
+
 @app.post("/api/vault/disconnect")
 def vault_disconnect():
     return wallet.vault_disconnect()
